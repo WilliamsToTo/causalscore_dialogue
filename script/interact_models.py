@@ -283,10 +283,10 @@ for dataset_name in datasets_name:
     CI_tokenizer = AutoTokenizer.from_pretrained(CI_model_path)
     CI_model = AutoModelForSequenceClassification.from_pretrained(CI_model_path).to(device)
 
-    compute_causal_metric_score_2(read_path=f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-round1-dependentScore.json",
+    compute_causal_metric_score_2(read_path=f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-dependentScore.json",
                                 CI_model=CI_model, I_model=I_model, CI_tokenizer=CI_tokenizer, I_tokenizer=I_tokenizer,
-                                save_path=f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-round1-dependentScore.json",
+                                save_path=f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-dependentScore.json",
                                   score_name="causal_score")
-    data = json.load(open(f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-round1-dependentScore.json", "r"))
+    data = json.load(open(f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-dependentScore.json", "r"))
 
 
