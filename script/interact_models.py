@@ -22,45 +22,6 @@ from evaluate import load
 from interact_llm import send_query
 
 
-texts = [
-    "Hi! How are you tonight?",
-    "I've been better.",
-    "I just buried my dog yesterday.",
-    "She was going to turn 15 next month",
-    "Ouch! I'm so sorry to hear that.",
-    "I never lost a dog, but I've lost cats.",
-    "Is 14 a good age for a dog?",
-    "I have my first dog so I don't know much, ",
-    "he is 9 years old and came with our house.",
-    "Actually, yes. She was old and had dementia.",
-    "The oldest dog I evet had was 15.",
-    "I'm so sorry, losing a pet is very hard on us.",
-    "It’s happy to have a dog."
-]
-
-def inference_abstract_model(texts, model_path, batch_size=16):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    tokenizer = T5Tokenizer.from_pretrained(model_path)
-    model = T5ForConditionalGeneration.from_pretrained(model_path).to(device)
-
-    # add prefix
-    for id, text in enumerate(texts):
-        texts[id] = f"abstraction: {text}"
-
-    generated_sents = []
-    for idx in tqdm(range(0, len(texts), batch_size)):
-        batch = texts[idx: idx+batch_size]
-        input_ids = tokenizer(batch, return_tensors="pt", padding=True, truncation=True).to(device)
-        outputs = model.generate(**input_ids, num_beams=10, max_length=500)
-        preds = tokenizer.batch_decode(outputs, skip_special_tokens=False)
-        generated_sents += preds
-
-    for sent_id, sent in enumerate(generated_sents):
-        generated_sents[sent_id] = generated_sents[sent_id].replace("<pad>", "").replace("</s>", "").strip()
-        
-    return generated_sents
-
-
 def inference_classifier_model(texts, model, tokenizer, batch_size=16):
     device = model.device
 
@@ -76,7 +37,6 @@ def inference_classifier_model(texts, model, tokenizer, batch_size=16):
             preds = [model.config.id2label[id.item()] for id in predicted_class_id]
             predicted_labels += preds
             probabilities += prob.tolist()
-
 
     if len(texts)==len(predicted_labels):
         return predicted_labels, probabilities
@@ -149,43 +109,6 @@ def create_combinations(l):
             if ele1 != ele2:
                 combinations.append((ele1, ele2))
     return combinations
-
-def inference_twoVariableConditional_dependence_dataset(dataset_path, save_path, model, tokenizer):
-    dataset = json.load(open(dataset_path, "r"))
-    new_dataset = []
-    for example in tqdm(dataset):
-        example["twoVariableConditional_dependence_utterances"] = []
-        history = example["history"]
-        dependent_utterances = example["conditional_dependence_utterances"]
-        response = example["response"]
-
-        if len(dependent_utterances) < 3:
-            example["twoVariableConditional_dependence_utterances"] = dependent_utterances
-        else:
-            for first_index, first_utterance in enumerate(dependent_utterances):
-                texts = []
-                twoVariableCombinations = create_combinations(dependent_utterances[:first_index] + dependent_utterances[first_index+1:])
-                for variables in twoVariableCombinations:
-                    if first_utterance != variables[0] and first_utterance != variables[1]:
-                        text = first_utterance + " </s> <s> " + variables[0] + " </s> <s> " + variables[1] + " </s> <s> " + response
-                        texts.append(text)
-                predicted_labels, labels_probability  = inference_classifier_model(texts, model=model, tokenizer=tokenizer, batch_size=16)
-
-                dep_count = 0
-                for text, label in zip(texts, predicted_labels):
-                    # if first utterance is conditional dependent with all second utterance, first utterance is a direct cause.
-                    if label == 1:
-                        dep_count += 1
-                # whether first utterance close to response
-                #in_scope = False
-                #for utterance in history[-10:]:
-                #    if first_utterance.strip() in utterance:
-                #        in_scope = True
-                if dep_count > 1:
-                    example["twoVariableConditional_dependence_utterances"].append(first_utterance)
-
-        new_dataset.append(example)
-    json.dump(new_dataset, open(save_path, "w+"), indent=4)
 
 
 def conditional_classifier_Estep(dependent_classifier="models/roberta_ESConv_dependent_classifier",
@@ -279,75 +202,6 @@ def create_pseudo_classification_dataset(file_path, train_save_path, valid_save_
     train_dataset.to_csv(train_save_path, index=False)
     valid_dataset.to_csv(valid_save_path, index=False)
 
-
-def compute_causal_metric_score(read_path, CI_model, I_model, CI_tokenizer, I_tokenizer, save_path):
-    print(read_path)
-    dataset = json.load(open(read_path, "r"))
-    new_dataset = []
-    system_names = {"alpaca_lora_response", "Blenderbot_400M_response", "Blenderbot_ft_response", "human_response"}
-    # compute response A metric scores
-    for system in system_names:
-        for item in dataset:
-            response_key = f"response_from_{system}"
-            if response_key in item:
-                response = item[response_key]["utterance"]
-                history = item["history"]
-                item[f"{response_key}_dependence_utterance"] = []
-                item[f"{response_key}_conditional_dependence_utterances"] = []
-                # compute dependence score
-                texts = []
-                for utterance in history:
-                    text = utterance["utterance"] + " </s> <s> " + response
-                    texts.append(text)
-                predicted_labels, labels_probability = inference_classifier_model(texts, model=I_model, tokenizer=I_tokenizer,
-                                                                                  batch_size=16)
-                for text, label, prob in zip(texts, predicted_labels, labels_probability):
-                    if label == 1:
-                        item[f"{response_key}_dependence_utterance"].append([text.split("</s> <s>")[0].strip(), prob[label]])
-                # compute conditional dependence score
-                dependent_utterances = item[f"{response_key}_dependence_utterance"]
-                for first_utterance in dependent_utterances:
-                    texts = []
-                    for second_utterance in dependent_utterances:
-                        if first_utterance[0] != second_utterance[0]:
-                            text = first_utterance[0] + " </s> <s> " + second_utterance[0] + " </s> <s> " + response
-                            texts.append(text)
-                    predicted_labels, labels_probability = inference_classifier_model(texts, model=CI_model,
-                                                                                      tokenizer=CI_tokenizer, batch_size=16)
-
-                    dep_count = 0
-                    label_1_probs = []
-                    for text, label, probs in zip(texts, predicted_labels, labels_probability):
-                        # if first utterance is conditional dependent with all second utterance, first utterance is a direct cause.
-                        label_1_probs.append(probs[1])
-                        # if label == 1:
-                        #     dep_count += 1
-                    # whether first utterance close to response
-                    #in_scope = False
-                    #for utterance in history[-5:]:
-                    #    if first_utterance[0].strip() in utterance:
-                    #        in_scope = True
-                    # if dep_count == len(texts):
-                    item[f"{response_key}_conditional_dependence_utterances"].append((first_utterance[0], label_1_probs))
-                new_dataset.append(item)
-    json.dump(new_dataset, open(save_path, "w+"), indent=4)
-
-def top_k_elements(lst, k=3):
-    """
-    Return the top k elements of a list in descending order.
-
-    Args:
-    lst (list): The list from which to find the top k elements.
-    k (int): The number of top elements to return.
-
-    Returns:
-    list: A list containing the top k elements.
-    """
-    if not isinstance(lst, list):
-        lst = [lst]
-    # Sort the list in descending order and return the first k elements
-    return sorted(lst, reverse=True)[:k]
-
 def compute_causal_metric_score_2(read_path, CI_model, I_model, CI_tokenizer, I_tokenizer, save_path, score_name="causal_score"):
     print(read_path)
     dataset = json.load(open(read_path, "r"))
@@ -393,19 +247,18 @@ def compute_causal_metric_score_2(read_path, CI_model, I_model, CI_tokenizer, I_
                     conditional_dependence_utterances.append((first_utterance[0], label_1_probs))
             else:
                 conditional_dependence_utterances = dependent_utterances
-            top_k=3
             # compute evaluation score of response
             dependent_scores = []
             for dependent_utterance in dependent_utterances:
                 dependent_scores.append(dependent_utterance[1])
             conditional_scores = []
             for causal_utterance in conditional_dependence_utterances:
-                conditional_scores.append(np.mean(top_k_elements(causal_utterance[1], top_k)))
+                conditional_scores.append(np.mean(causal_utterance[1]))
 
             if len(dependent_scores) > 0 and len(conditional_scores) > 0:
-                item[system][score_name] = (np.mean(top_k_elements(dependent_scores, top_k)) + np.mean(conditional_scores))/2
+                item[system][score_name] = (np.mean(dependent_scores) + np.mean(conditional_scores))/2
             elif len(dependent_scores) > 0 and len(conditional_scores) == 0 :
-                item[system][score_name] = np.mean(top_k_elements(dependent_scores, top_k))/2
+                item[system][score_name] = np.mean(dependent_scores)/2
             else:
                 item[system][score_name] = 0
         for pair in pairs:
@@ -414,7 +267,6 @@ def compute_causal_metric_score_2(read_path, CI_model, I_model, CI_tokenizer, I_
 
         new_dataset.append(item)
     json.dump(new_dataset, open(save_path, "w+"), indent=4)
-
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -427,10 +279,10 @@ for dataset_name in datasets_name:
     I_tokenizer = AutoTokenizer.from_pretrained(I_model_path)
     I_model = AutoModelForSequenceClassification.from_pretrained(I_model_path).to(device)
 
-    CI_model_path=f"models/roberta_{dataset_name}_conditionalCI_classifier"
+    CI_model_path=f"models/roberta_{dataset_name}_conditionalCI_classifier_EMbest"
     CI_tokenizer = AutoTokenizer.from_pretrained(CI_model_path)
     CI_model = AutoModelForSequenceClassification.from_pretrained(CI_model_path).to(device)
-    
+
     compute_causal_metric_score_2(read_path=f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-round1-dependentScore.json",
                                 CI_model=CI_model, I_model=I_model, CI_tokenizer=CI_tokenizer, I_tokenizer=I_tokenizer,
                                 save_path=f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-round1-dependentScore.json",
