@@ -19,7 +19,6 @@ from scipy.stats import pointbiserialr, pearsonr, spearmanr
 import matplotlib.pyplot as plt
 import seaborn as sns
 from evaluate import load
-from interact_llm import send_query
 
 
 def inference_classifier_model(texts, model, tokenizer, batch_size=16):
@@ -275,18 +274,16 @@ datasets_name = ["dream", "ESConv", "msc"] #"msc", "dream", "ESConv",
 for dataset_name in datasets_name:
     print(dataset_name)
     # load models
-    I_model_path=f"models/roberta_{dataset_name}_dependent_classifier"
+    I_model_path=f"/home/taof/dialog_relevance_eval/models/roberta_{dataset_name}_dependent_classifier"
     I_tokenizer = AutoTokenizer.from_pretrained(I_model_path)
     I_model = AutoModelForSequenceClassification.from_pretrained(I_model_path).to(device)
 
-    CI_model_path=f"models/roberta_{dataset_name}_conditionalCI_classifier_EMbest"
+    CI_model_path=f"/home/taof/dialog_relevance_eval/models/roberta_{dataset_name}_conditionalCI_classifier"
     CI_tokenizer = AutoTokenizer.from_pretrained(CI_model_path)
     CI_model = AutoModelForSequenceClassification.from_pretrained(CI_model_path).to(device)
 
-    compute_causal_metric_score_2(read_path=f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-dependentScore.json",
+    compute_causal_metric_score_2(read_path=f"datasets/{dataset_name}_test.json",
                                 CI_model=CI_model, I_model=I_model, CI_tokenizer=CI_tokenizer, I_tokenizer=I_tokenizer,
-                                save_path=f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-dependentScore.json",
+                                save_path=f"datasets/{dataset_name}_test.json",
                                   score_name="causal_score")
-    data = json.load(open(f"datasets/human_evaluation_dataset/pairwise_comparison/{dataset_name}-dependentScore.json", "r"))
-
 

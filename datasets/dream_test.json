@@ -1,0 +1,135 @@
+[
+    {
+        "id": "6145478367",
+        "history": [
+            {
+                "speaker": "M",
+                "utterance": "You know the party last night? Lots of old faces from college were there."
+            },
+            {
+                "speaker": "W",
+                "utterance": "Really?"
+            },
+            {
+                "speaker": "M",
+                "utterance": "Yeah. Sally was there with her husband; I heard he,s something very high up and important in some business company."
+            },
+            {
+                "speaker": "W",
+                "utterance": "Yes, I heard that too. To tell you the truth, I never really expected her to marry someone successful. She was alway untidy and didn't like to work."
+            },
+            {
+                "speaker": "M",
+                "utterance": "Obviously, she has changed her attitude to life. I mean she was very smartly dressed, and she kept telling me all about how much money their new house had cost."
+            },
+            {
+                "speaker": "W",
+                "utterance": "Seriously."
+            },
+            {
+                "speaker": "M",
+                "utterance": "Yes, she was really proud of it."
+            },
+            {
+                "speaker": "W",
+                "utterance": "Well,she never used to be interested in money at all."
+            },
+            {
+                "speaker": "M",
+                "utterance": "By the way, Simon Fox was at the party."
+            }
+        ],
+        "human_response": {
+            "speaker": "W",
+            "utterance": "Was he? I haven't seen him for ages.",
+            "causal_score": 0.5409244690090418
+        },
+        "alpaca_lora_response": {
+            "speaker": "W",
+            "utterance": "Wow, it's amazing how much Sally has changed since college. It's great to hear that she's found success in her life.",
+            "causal_score": 0.5584303534783733
+        },
+        "Blenderbot_400M_response": {
+            "speaker": "W",
+            "utterance": " Simon Fox was at the party? I didn't know that.",
+            "causal_score": 0.5414797016084776
+        },
+        "Blenderbot_ft_response": {
+            "speaker": "W",
+            "utterance": "It was at a friend's house. She invited some of her friends.",
+            "causal_score": 0.5282849824676911
+        },
+        "alpaca_lora_response-vs-Blenderbot_400M_response": {
+            "alpaca_lora_response": {
+                "speaker": "W",
+                "utterance": "Wow, it's amazing how much Sally has changed since college. It's great to hear that she's found success in her life.",
+                "causal_score": 0.5584303534783733
+            },
+            "Blenderbot_400M_response": {
+                "speaker": "W",
+                "utterance": " Simon Fox was at the party? I didn't know that.",
+                "causal_score": 0.5414797016084776
+            }
+        },
+        "alpaca_lora_response-vs-Blenderbot_ft_response": {
+            "alpaca_lora_response": {
+                "speaker": "W",
+                "utterance": "Wow, it's amazing how much Sally has changed since college. It's great to hear that she's found success in her life.",
+                "causal_score": 0.5584303534783733
+            },
+            "Blenderbot_ft_response": {
+                "speaker": "W",
+                "utterance": "It was at a friend's house. She invited some of her friends.",
+                "causal_score": 0.5282849824676911
+            }
+        },
+        "alpaca_lora_response-vs-human_response": {
+            "alpaca_lora_response": {
+                "speaker": "W",
+                "utterance": "Wow, it's amazing how much Sally has changed since college. It's great to hear that she's found success in her life.",
+                "causal_score": 0.5584303534783733
+            },
+            "human_response": {
+                "speaker": "W",
+                "utterance": "Was he? I haven't seen him for ages.",
+                "causal_score": 0.5409244690090418
+            }
+        },
+        "Blenderbot_400M_response-vs-Blenderbot_ft_response": {
+            "Blenderbot_400M_response": {
+                "speaker": "W",
+                "utterance": " Simon Fox was at the party? I didn't know that.",
+                "causal_score": 0.5414797016084776
+            },
+            "Blenderbot_ft_response": {
+                "speaker": "W",
+                "utterance": "It was at a friend's house. She invited some of her friends.",
+                "causal_score": 0.5282849824676911
+            }
+        },
+        "Blenderbot_400M_response-vs-human_response": {
+            "Blenderbot_400M_response": {
+                "speaker": "W",
+                "utterance": " Simon Fox was at the party? I didn't know that.",
+                "causal_score": 0.5414797016084776
+            },
+            "human_response": {
+                "speaker": "W",
+                "utterance": "Was he? I haven't seen him for ages.",
+                "causal_score": 0.5409244690090418
+            }
+        },
+        "Blenderbot_ft_response-vs-human_response": {
+            "Blenderbot_ft_response": {
+                "speaker": "W",
+                "utterance": "It was at a friend's house. She invited some of her friends.",
+                "causal_score": 0.5282849824676911
+            },
+            "human_response": {
+                "speaker": "W",
+                "utterance": "Was he? I haven't seen him for ages.",
+                "causal_score": 0.5409244690090418
+            }
+        }
+    }
+]
