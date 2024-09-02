@@ -9,6 +9,8 @@ conda activate dialog_rel
 ```
 
 ## Usage
+`annotation/amazon_mturk_interface.html` is the annotation interface on amazon mturk.
+
 `run_text_classification.py` is the training script for unconditional independence classifier.
 
 `run_condtional_classifier_EM.py` is the training script for conditional independence classifier.
