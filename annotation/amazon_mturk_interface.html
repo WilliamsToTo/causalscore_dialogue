@@ -1,0 +1,107 @@
+<head>
+<style>
+mark {
+  background-color: #D3D3D3;
+  color: black;
+}
+</style>
+</head>
+
+<script src="https://assets.crowd.aws/crowd-html-elements.js"></script>
+
+
+<crowd-form id="crowd-form">
+      <crowd-button form-action="submit" style="display: none;"></crowd-button>
+</crowd-form>
+
+<!-- ${conversation} -->
+<crowd-entity-annotation
+  name="crowd-entity-annotation"
+  header="Highlight causes of response"
+  labels="[{'label': 'cause', 'shortDisplayName': 'cause', 'fullDisplayName': 'Cause of response'}]"
+  text="${conversation}"
+>
+    <full-instructions header="Named entity recognition instructions">
+    In this task, you will see one conversation history between two speakers and one response.
+    Your job is to highlight text that you believe are the causes of the response.
+    You can understand the cause of response is this way "<i>because of these texts, the speaker makes this response</i>"
+    or "<i>without these texts, making this response is groundless</i>".
+    <br>
+    <b>How to do this task:</b>
+    <ol>
+      <li><strong>Read</strong> dialogue history and response carefully.</li>
+      <li><strong>Select </strong> text that you think is the cause of the response.</li>
+      <li><strong>Click</strong> the label on the right side to highlight text.</li>
+      <li>Click <strong>“submit”</strong> on the bottom right corner to submit your task.</li>
+      <li>To <strong>remove</strong> a label from highlighted text, choose the X next to the abbreviated label name on the highlighted text.</li>
+      <li>If you think there is no cause of this response, click “No entities to label” on the bottom right corner, and submit it.</li>
+      <li>You can select all of a previously highlighted text, but not a portion of it.</li>
+    </ol>
+    <br>
+    <b>There are some examples to help you better understand our task.</b><br>
+    <strong>Example 1: </strong><br>
+        <p style="margin-left: 40px">
+            <strong>Speaker 1</strong>: <mark>I've decided to visit Mexico next week for a month. It will give me some good content for my blog</mark>.<br>
+            <strong>Speaker 2</strong>: Nice. Will you be staying in one place or moving all around?<br>
+            <strong>Speaker 1</strong>: I can't wait!  <mark>I'm going to pack in as much as I can and will travel all over.</mark>  I'll start on the west coast by the beaches! <br>
+
+            <strong>Response</strong>: I've never been myself but my cousins have and their pictures looked amazing. Make sure you bring extra chargers and memory cards so you have enough space. Is your blog about travel?<br>
+
+	        <strong>Why annotate these text</strong>:
+	        <ol style="margin-left: 40px">
+              <li>Speaker1 mentions (s)he will travel to Mexico, which is the cause of "I've never been myself but my cousins have and their pictures looked amazing".</li>
+              <li>Speaker1 mentions (s)he is going to pack, which is the cause of "Make sure you bring extra chargers and memory cards so you have enough space".</li>
+              <li>Speaker1 mentions (s)he visit Mexico for blog, which is the cause of "Is your blog about travel?".</li>
+            </ol>
+
+	    </p>
+	<strong>Example 2: </strong><br>
+	    <p style="margin-left: 40px">
+            <strong>Speaker 1</strong>: <mark>I've decided to visit Mexico next week for a month. It will give me some good content for my blog.</mark><br>
+            <strong>Speaker 2</strong>: Nice. Will you be staying in one place or moving all around?<br>
+            <strong>Speaker 1</strong>: <mark>I can't wait! I'm going to pack in as much as I can and will travel all over.</mark> I'll start on the west coast by the beaches! <br>
+            <strong>Speaker 2</strong>: I've never been myself but my cousins have and their pictures looked amazing. Make sure you bring extra chargers and memory cards so you have enough space. Is your blog about travel?<br>
+	        <strong>Speaker 1</strong>: Oh that's awesome advice, thanks!  <mark>Yes and no - I write about travel whenever I can, but there's also a lot about food, lifestyle, and of course coffee.</mark><br>
+
+	        <strong>Response</strong>: Sounds interesting and like it wouldn't be tedious to write since the topics vary. You'll definitely have a lot of inspiration down in Mexico. A lot of food and culture to choose from. When do you leave?<br>
+
+            <strong>Why annotate these text</strong>:
+	        <ol style="margin-left: 40px">
+              <li>Speaker1 mentions his(her) blog topics include travel, food, lifestyle, etc, which is the cause of "Sounds interesting and like it wouldn't be tedious to write since the topics vary". </li>
+              <li>Speaker1 mentions (s)he will visit Mexico for blog, which is the cause of "You'll definitely have a lot of inspiration down in Mexico". </li>
+              <li>Speaker1 mentions (s)he is packing and want to visit Mexico now, which is the cause of "When do you leave?". </li>
+            </ol>
+
+	    </p>
+
+    </full-instructions>
+
+  <short-instructions>
+      <ol >
+          <li>Given a conversation history and a response, highlight texts that you believe are the causes of response.</li>
+          <li>Select text, then click the "Cause of response" label on the right side to highligh it.</li>
+          <li>Click "More Instructions" or <a href="https://docs.google.com/document/d/19q4MYTlthsRg9uL-JinCCVb7Qd7kszTHl4HaqTFTYc4/edit?usp=sharing" rel="noopener noreferrer" target="_blank">this google doc</a> if you are new to this task.</li>
+      </ol>
+  </short-instructions>
+
+
+    <div id="additionalQuestions" style="margin-top: 20px">
+      <h3>
+        Response: ${response}
+      </h3>
+      <crowd-text-area name="feedback" rows="1" label="Report Error(optional, write here when you find this HIT has error.)"></crowd-text-area>
+      <crowd-text-area name="email" rows="1" label="Your Email Address(optional, we may invite you for future tasks.)"></crowd-text-area>
+    </div>
+</crowd-entity-annotation>
+
+
+<script>
+  document.addEventListener('all-crowd-elements-ready', () => {
+    document
+      .querySelector('crowd-entity-annotation')
+      .shadowRoot
+      .querySelector('crowd-form')
+      .form
+      .appendChild(additionalQuestions);
+  });
+</script>
